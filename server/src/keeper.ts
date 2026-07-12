@@ -173,8 +173,14 @@ async function onScoresMessage(_event: string | undefined, data: unknown) {
 // ---------------------------------------------------------------------------
 
 const settling = new Set<string>();
+const lastAttempt = new Map<number, number>();
 
 export async function settleFixture(fixtureId: number, finalSeq: number): Promise<void> {
+  // The finalised record can be re-broadcast; don't hammer the RPC.
+  const last = lastAttempt.get(fixtureId) ?? 0;
+  if (Date.now() - last < 30_000) return;
+  lastAttempt.set(fixtureId, Date.now());
+
   const markets = await chain.fetchAllMarkets();
   const open = markets.filter((m) => m.fixtureId === fixtureId && m.state === "open");
   if (!open.length) return;
@@ -201,11 +207,7 @@ export async function settleFixture(fixtureId: number, finalSeq: number): Promis
       }
 
       const kindNum = { winner: 0, totalGoals: 1, totalCorners: 2 }[m.kind as string]!;
-      const signature = await chain.settleMarket(
-        new (await import("@solana/web3.js")).PublicKey(m.address),
-        outcome,
-        validation
-      );
+      const signature = await chain.settleMarket(m.address, outcome, validation);
       const { pda, epochDay } = chain.dailyScoresPda(validation.summary.updateStats.minTimestamp);
 
       store.receipts.push({

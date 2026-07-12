@@ -160,7 +160,7 @@ export function describeStrategy(kind: number, line: number, outcome: number) {
 }
 
 export async function settleMarket(
-  market: PublicKey,
+  market: string | PublicKey,
   winningOutcome: number,
   validation: any
 ): Promise<string> {
@@ -170,7 +170,7 @@ export async function settleMarket(
   return (finalwhistle.methods as any)
     .settle(winningOutcome, payload)
     .accounts({
-      market,
+      market: new PublicKey(market),
       dailyScoresMerkleRoots: pda,
       txoracleProgram: txoracle.programId,
     })

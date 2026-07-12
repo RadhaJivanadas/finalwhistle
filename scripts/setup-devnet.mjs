@@ -19,7 +19,7 @@ const ROOT = path.resolve(__dirname, "..");
 const API_HOST = "https://txline-dev.txodds.com";
 const RPC = process.env.RPC_URL || "https://api.devnet.solana.com";
 const TOKEN_MINT = new PublicKey("4Zao8ocPhmMgq7PdsYWyxvqySMGx7xb9cMftPMkEokRG");
-const IDL_PATH = path.resolve(ROOT, "../tx-on-chain/examples/devnet/idl/txoracle.json");
+const IDL_PATH = path.join(ROOT, "server", "idl", "txoracle.json");
 const KEY_PATH = path.join(ROOT, ".keys", "keeper.json");
 const ENV_PATH = path.join(ROOT, ".env.devnet");
 
