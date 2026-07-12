@@ -1,0 +1,15 @@
+# Test-only stand-in for the TxLINE txoracle program. Loaded at txoracle's
+# address on a local validator so the settle CPI path can be exercised without
+# devnet. It always returns `true` — see scripts/smoke-test-settle.mjs.
+[package]
+name = "mock-oracle"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+solana-program = "2.2"
+
+[workspace]

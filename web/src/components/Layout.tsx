@@ -1,5 +1,22 @@
+import { useEffect, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { subscribe } from "../lib/api";
+
+function DemoBanner() {
+  const [demo, setDemo] = useState<any>(null);
+  useEffect(() => subscribe("demo", setDemo), []);
+  if (!demo || demo.phase === "done") return null;
+  return (
+    <div className="border-b border-pitch-700 bg-pitch-800 px-4 py-1.5 text-center text-xs text-ink-300">
+      {demo.phase === "betting" ? (
+        <>🎬 Replay demo: betting window open on fixture <span className="mono">{demo.fixtureId}</span> — place a bet, kickoff soon.</>
+      ) : (
+        <>🎬 Replaying real TxLINE match data for fixture <span className="mono">{demo.fixtureId}</span> — settlement at the final whistle will be a real on-chain proof.</>
+      )}
+    </div>
+  );
+}
 
 export function Layout() {
   const { pathname } = useLocation();
@@ -9,6 +26,7 @@ export function Layout() {
   ];
   return (
     <div className="min-h-screen bg-pitch-950 text-ink-100">
+      <DemoBanner />
       <header className="sticky top-0 z-40 border-b border-pitch-700 bg-pitch-950/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center gap-6 px-4 py-3">
           <Link to="/" className="flex items-center gap-2 text-lg font-bold tracking-tight">

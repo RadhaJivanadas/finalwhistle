@@ -31,6 +31,12 @@ export const config = {
   autoMarkets: process.env.AUTO_MARKETS !== "0",
   /// Default total-goals half line (2 = over/under 2.5).
   defaultGoalsLine: Number(process.env.DEFAULT_GOALS_LINE ?? 2),
+  /// Keep a demo replay running whenever no covered match is live, so the
+  /// deployed MVP is always showing the full flow (betting → live → settle).
+  demoAutoloop: process.env.DEMO_AUTOLOOP === "1",
+  /// Optional pinned fixture for the demo replay; otherwise the most recent
+  /// finished fixture within the historical window is picked automatically.
+  demoFixtureId: Number(process.env.DEMO_FIXTURE_ID || 0) || undefined,
 };
 
 fs.mkdirSync(config.dataDir, { recursive: true });

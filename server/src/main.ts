@@ -12,3 +12,9 @@ if (!config.txlineApiToken) {
 
 startApi();
 startKeeper();
+
+if (config.demoAutoloop) {
+  const { startDemoAutoloop } = await import("./demo.js");
+  startDemoAutoloop();
+  console.log("[demo] autoloop enabled");
+}

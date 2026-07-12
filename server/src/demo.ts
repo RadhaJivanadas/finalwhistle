@@ -13,6 +13,8 @@ import * as txline from "./txline.js";
 import * as chain from "./chain.js";
 import { applyScoreRecord, settleFixture } from "./keeper.js";
 
+import { config } from "./config.js";
+
 export interface DemoStatus {
   running: boolean;
   fixtureId?: number;
@@ -95,4 +97,45 @@ export async function runDemo(fixtureId: number, speed = 2, bettingSecs = 90): P
   } finally {
     demoStatus.running = false;
   }
+}
+
+/** Pick a fixture whose full history is still served (started 6h..13d ago). */
+async function pickReplayFixture(): Promise<number | undefined> {
+  if (config.demoFixtureId) return config.demoFixtureId;
+  const now = Date.now();
+  const candidates = [...store.fixtures.values()]
+    .filter((f) => f.startTime < now - 6 * 3600_000 && f.startTime > now - 13 * 86400_000)
+    .sort((a, b) => b.startTime - a.startTime);
+  for (const f of candidates) {
+    try {
+      const recs = await txline.fetchHistoricalScores(f.fixtureId);
+      if (recs.length > 5) return f.fixtureId;
+    } catch {
+      /* no history for this one; try the next */
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Attract mode: whenever nothing is live and no demo is running, replay a
+ * recent real fixture end-to-end (with real on-chain settlement).
+ */
+export function startDemoAutoloop() {
+  const tick = async () => {
+    try {
+      if (demoStatus.running) return;
+      const anyLive = [...store.live.values()].some((s) => !s.finalised && (s.seq ?? 0) > 0
+        && Date.now() - (s.ts ?? 0) < 10 * 60_000);
+      if (anyLive) return;
+      const fixtureId = await pickReplayFixture();
+      if (!fixtureId) return;
+      console.log(`[demo] autoloop starting replay of fixture ${fixtureId}`);
+      await runDemo(fixtureId, 3, 120);
+    } catch (e: any) {
+      console.warn(`[demo] autoloop: ${e.message}`);
+    }
+  };
+  setTimeout(tick, 20_000); // let fixtures sync first
+  setInterval(tick, 5 * 60_000);
 }
