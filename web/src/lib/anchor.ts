@@ -138,7 +138,12 @@ const mapProof = (nodes: any[]) =>
 /**
  * Re-runs the exact on-chain validation of a settlement receipt as a read-only
  * simulation from this browser: same proof, same predicate, same TxLINE
- * program, same daily Merkle-root account. Returns the oracle's boolean.
+ * program, same daily Merkle-root account. Returns the oracle's boolean,
+ * decoded from the program's return data.
+ *
+ * The transaction is never sent — `simulateTransaction` with sigVerify off.
+ * Any existing account can serve as fee payer for a simulation; we use the
+ * keeper's public key fetched from /api/health.
  */
 export async function verifyReceiptInBrowser(receipt: SettlementReceipt): Promise<boolean> {
   const provider = new AnchorProvider(connection, readonlyWallet() as any, {
@@ -190,9 +195,28 @@ export async function verifyReceiptInBrowser(receipt: SettlementReceipt): Promis
     txoracle.programId
   );
 
-  return (txoracle.methods as any)
+  const ix = await (txoracle.methods as any)
     .validateStatV2(payload, strategy)
     .accounts({ dailyScoresMerkleRoots: dailyScoresPda })
-    .preInstructions([ComputeBudgetProgram.setComputeUnitLimit({ units: 1_400_000 })])
-    .view();
+    .instruction();
+
+  // Any funded account works as simulation fee payer; ask the API for one.
+  const health = await (await fetch("/api/health")).json();
+  const payer = new PublicKey(health.keeper);
+
+  const { TransactionMessage, VersionedTransaction } = await import("@solana/web3.js");
+  const msg = new TransactionMessage({
+    payerKey: payer,
+    recentBlockhash: (await connection.getLatestBlockhash()).blockhash,
+    instructions: [ComputeBudgetProgram.setComputeUnitLimit({ units: 1_400_000 }), ix],
+  }).compileToV0Message();
+  const tx = new VersionedTransaction(msg);
+
+  const sim = await connection.simulateTransaction(tx, { sigVerify: false });
+  if (sim.value.err) {
+    throw new Error(`oracle simulation failed: ${JSON.stringify(sim.value.err)}`);
+  }
+  const ret = sim.value.returnData?.data?.[0];
+  if (!ret) throw new Error("oracle returned no data");
+  return Buffer.from(ret, "base64")[0] === 1;
 }
