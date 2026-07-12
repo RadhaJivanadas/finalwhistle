@@ -63,16 +63,20 @@ If nobody can produce a valid proof (fixture cancelled, coverage dropped), a tim
 ```bash
 npm install                        # root, server and web workspaces
 
-# 1) one-time: wallet + TxLINE devnet free-tier subscription + API token
-node scripts/setup-devnet.mjs      # writes .env.devnet
+# fund .keys/keeper.json with ~5 devnet SOL (https://faucet.solana.com), then:
+bash scripts/go-live.sh            # deploy + subscribe + build + start
 
-# 2) build + deploy the program (or use the already-deployed devnet program id)
-cd program && anchor build && anchor deploy && cd ..
-
-# 3) run
+# or step by step:
+node scripts/setup-devnet.mjs      # wallet + TxLINE free tier + API token -> .env.devnet
+bash scripts/deploy-program.sh     # deploy program/target/deploy/finalwhistle.so
 npm run dev -w server              # keeper + API on :8787
 npm run dev -w web                 # UI on :5173 (proxies /api)
 ```
+
+Tests: `cargo test` in `program/programs/finalwhistle` (predicate/payout units), plus two
+on-chain suites against a local validator — `scripts/smoke-test.mjs` (market lifecycle) and
+`scripts/smoke-test-settle.mjs` (settlement gates, CPI return data, payouts; uses
+`program/mock-oracle` loaded at the txoracle address).
 
 Production: `npm run build -w web` then `npm start -w server` — the server serves the built UI and everything runs off one port. A `Dockerfile` is included.
 
