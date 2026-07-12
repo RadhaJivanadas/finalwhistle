@@ -1,0 +1,10 @@
+node_modules/
+dist/
+target/
+.keys/
+.env
+.env.devnet
+data/
+docs-research/
+*.log
+.DS_Store

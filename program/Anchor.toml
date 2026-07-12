@@ -1,0 +1,19 @@
+[toolchain]
+anchor_version = "0.31.1"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.devnet]
+finalwhistle = "3pqHn5WcqLpHRcZDP6FKTSez7VmjeDDzzuxb72FUoB3P"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "devnet"
+wallet = "../.keys/keeper.json"
+
+[scripts]
+test = "echo no ts tests"
