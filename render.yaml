@@ -6,7 +6,7 @@ services:
   - type: web
     name: finalwhistle
     runtime: docker
-    plan: starter # free plan sleeps on idle, which would pause the keeper
+    plan: free # no card required; the server self-pings RENDER_EXTERNAL_URL to avoid idle spin-down
     healthCheckPath: /api/health
     envVars:
       - key: PORT
