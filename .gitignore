@@ -8,3 +8,4 @@ data/
 docs-research/
 *.log
 .DS_Store
+.render-env.txt
