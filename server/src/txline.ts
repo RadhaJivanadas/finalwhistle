@@ -179,6 +179,31 @@ export async function fetchOddsSnapshot(fixtureId: number): Promise<any[]> {
   return res.data ?? [];
 }
 
+/**
+ * Find recently finished fixtures by scanning historical 5-minute update
+ * windows (the fixtures snapshot only lists upcoming matches). Scans from the
+ * most recent day backwards and returns fixture ids ordered newest-first.
+ */
+export async function findRecentFinishedFixtures(maxDaysBack = 12): Promise<number[]> {
+  const today = Math.floor(Date.now() / 86_400_000);
+  const seen = new Map<number, number>(); // fixtureId -> day last seen
+  for (let d = today; d >= today - maxDaysBack; d--) {
+    for (let hr = 0; hr < 24; hr++) {
+      try {
+        const res = await api.get(`/api/scores/updates/${d}/${hr}/0`);
+        for (const rec of res.data ?? []) {
+          const id = Number(rec.FixtureId ?? rec.fixtureId);
+          if (id && !seen.has(id)) seen.set(id, d);
+        }
+      } catch {
+        /* empty window */
+      }
+    }
+    if (seen.size > 0 && d < today) break; // newest full day with data is enough
+  }
+  return [...seen.entries()].sort((a, b) => b[1] - a[1]).map(([id]) => id);
+}
+
 /** Merkle proof for a set of stats of one score record (validateStatV2 shape). */
 export async function fetchStatValidation(
   fixtureId: number,

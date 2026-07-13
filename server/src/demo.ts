@@ -100,16 +100,28 @@ export async function runDemo(fixtureId: number, speed = 2, bettingSecs = 90): P
 }
 
 /** Pick a fixture whose full history is still served (started 6h..13d ago). */
+let cachedReplayFixture: { id: number; at: number } | undefined;
+
 async function pickReplayFixture(): Promise<number | undefined> {
   if (config.demoFixtureId) return config.demoFixtureId;
+  if (cachedReplayFixture && Date.now() - cachedReplayFixture.at < 6 * 3600_000) {
+    return cachedReplayFixture.id;
+  }
   const now = Date.now();
-  const candidates = [...store.fixtures.values()]
+  // The fixtures snapshot only lists upcoming matches, so also scan recent
+  // score-update windows for fixtures that already played.
+  const fromSnapshot = [...store.fixtures.values()]
     .filter((f) => f.startTime < now - 6 * 3600_000 && f.startTime > now - 13 * 86400_000)
-    .sort((a, b) => b.startTime - a.startTime);
-  for (const f of candidates) {
+    .sort((a, b) => b.startTime - a.startTime)
+    .map((f) => f.fixtureId);
+  const scanned = fromSnapshot.length ? [] : await txline.findRecentFinishedFixtures();
+  for (const id of [...fromSnapshot, ...scanned]) {
     try {
-      const recs = await txline.fetchHistoricalScores(f.fixtureId);
-      if (recs.length > 5) return f.fixtureId;
+      const recs = await txline.fetchHistoricalScores(id);
+      if (recs.length > 5 && recs.some((r) => (r.Action ?? r.action) === "game_finalised")) {
+        cachedReplayFixture = { id, at: Date.now() };
+        return id;
+      }
     } catch {
       /* no history for this one; try the next */
     }
