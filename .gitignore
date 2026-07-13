@@ -9,3 +9,5 @@ docs-research/
 *.log
 .DS_Store
 .render-env.txt
+final-demo.mp4
+scripts/video/out*/

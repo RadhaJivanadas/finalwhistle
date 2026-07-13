@@ -30,6 +30,7 @@
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
+    "playwright": "^1.61.1",
     "vite-plugin-node-polyfills": "^0.23.0"
   }
 }

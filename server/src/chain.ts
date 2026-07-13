@@ -32,6 +32,27 @@ function loadIdl(name: string) {
 export const finalwhistle = new Program(loadIdl("finalwhistle"), provider);
 export const txoracle = new Program(loadIdl("txoracle"), provider);
 
+/** Public devnet RPC rate-limits datacenter IPs aggressively; retry 429s and
+ *  transient network errors with backoff instead of failing the operation. */
+export async function withRetry<T>(label: string, fn: () => Promise<T>, attempts = 4): Promise<T> {
+  let lastErr: any;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn();
+    } catch (e: any) {
+      lastErr = e;
+      const msg = String(e.message ?? e);
+      const transient = msg.includes("429") || msg.includes("Too Many Requests")
+        || msg.includes("fetch failed") || msg.includes("timed out") || msg.includes("ECONNRESET");
+      if (!transient || i === attempts - 1) throw e;
+      const delay = 5000 * (i + 1);
+      console.warn(`[chain] ${label}: transient RPC error, retry ${i + 1}/${attempts - 1} in ${delay}ms`);
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+  throw lastErr;
+}
+
 export const MarketKind = { Winner: 0, TotalGoals: 1, TotalCorners: 2 } as const;
 export type MarketKindName = keyof typeof MarketKind;
 
@@ -80,18 +101,20 @@ export async function createMarket(
   nonce = 0
 ): Promise<{ market: PublicKey; signature: string } | null> {
   const market = marketPda(fixtureId, kind, line, nonce);
-  const existing = await connection.getAccountInfo(market);
+  const existing = await withRetry("getAccountInfo", () => connection.getAccountInfo(market));
   if (existing) return null; // already created
 
-  const signature = await (finalwhistle.methods as any)
-    .createMarket(new BN(fixtureId), KIND_VARIANT[kind], line, nonce, new BN(kickoffTs))
-    .accounts({
-      market,
-      vault: vaultPda(market),
-      creator: keeper.publicKey,
-      systemProgram: SystemProgram.programId,
-    })
-    .rpc();
+  const signature = await withRetry("createMarket", () =>
+    (finalwhistle.methods as any)
+      .createMarket(new BN(fixtureId), KIND_VARIANT[kind], line, nonce, new BN(kickoffTs))
+      .accounts({
+        market,
+        vault: vaultPda(market),
+        creator: keeper.publicKey,
+        systemProgram: SystemProgram.programId,
+      })
+      .rpc()
+  );
   return { market, signature };
 }
 
@@ -170,19 +193,21 @@ export async function settleMarket(
   const payload = buildPayload(validation);
   const { pda } = dailyScoresPda(validation.summary.updateStats.minTimestamp);
 
-  return (finalwhistle.methods as any)
-    .settle(winningOutcome, payload)
-    .accounts({
-      market: new PublicKey(market),
-      dailyScoresMerkleRoots: pda,
-      txoracleProgram: txoracle.programId,
-    })
-    .preInstructions([ComputeBudgetProgram.setComputeUnitLimit({ units: 1_400_000 })])
-    .rpc();
+  return withRetry("settle", () =>
+    (finalwhistle.methods as any)
+      .settle(winningOutcome, payload)
+      .accounts({
+        market: new PublicKey(market),
+        dailyScoresMerkleRoots: pda,
+        txoracleProgram: txoracle.programId,
+      })
+      .preInstructions([ComputeBudgetProgram.setComputeUnitLimit({ units: 1_400_000 })])
+      .rpc()
+  );
 }
 
 export async function fetchAllMarkets(): Promise<any[]> {
-  const accounts = await (finalwhistle.account as any).market.all();
+  const accounts = await withRetry("market.all", () => (finalwhistle.account as any).market.all());
   return accounts.map((a: any) => ({
     address: a.publicKey.toBase58(),
     fixtureId: Number(a.account.fixtureId),
