@@ -42,6 +42,10 @@
   actual usage varies with proof depth. Publishing typical/worst-case CU per proof shape
   would let integrators set tighter budgets (matters once settlement txs carry more
   instructions).
+- **`/api/scores/historical` returns SSE-formatted text over a plain GET.** The response is
+  `data: {...}` blocks rather than a JSON array, unlike the sibling snapshot/updates
+  endpoints — we only caught it in integration. Either documenting this or offering an
+  `Accept: application/json` variant would smooth it out.
 - **Minor:** `/api/scores/stat-validation` with `seq=0` fails with a generic error rather
   than "sequence must be ≥ 1"; and odds `Prices` scaling (×1000 integers) is easy to miss
   on first read.

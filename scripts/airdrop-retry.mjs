@@ -4,7 +4,7 @@ import fs from "fs";
 const kp = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(fs.readFileSync(".keys/keeper.json", "utf8"))));
 const c = new Connection("https://api.devnet.solana.com", "confirmed");
 
-for (let attempt = 1; attempt <= 60; attempt++) {
+for (let attempt = 1; attempt <= 500; attempt++) {
   const bal = await c.getBalance(kp.publicKey);
   if (bal >= 0.05 * LAMPORTS_PER_SOL) {
     console.log(`FUNDED balance=${bal / LAMPORTS_PER_SOL}`);
@@ -21,7 +21,7 @@ for (let attempt = 1; attempt <= 60; attempt++) {
     }
     await new Promise(r => setTimeout(r, 5000));
   }
-  await new Promise(r => setTimeout(r, 8 * 60 * 1000));
+  await new Promise(r => setTimeout(r, 20 * 60 * 1000));
 }
 console.log("GAVE UP");
 process.exit(1);

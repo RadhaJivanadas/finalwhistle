@@ -153,9 +153,25 @@ export async function fetchScoresSnapshot(fixtureId: number): Promise<any[]> {
   return res.data ?? [];
 }
 
+/** `/api/scores/historical` streams SSE-formatted text (`data: {...}` blocks)
+ *  even over a plain GET — parse it into an array of records. */
 export async function fetchHistoricalScores(fixtureId: number): Promise<any[]> {
-  const res = await api.get(`/api/scores/historical/${fixtureId}`);
-  return res.data ?? [];
+  const res = await api.get(`/api/scores/historical/${fixtureId}`, {
+    responseType: "text",
+    transformResponse: [(d) => d],
+  });
+  const body: string = res.data ?? "";
+  if (body.trimStart().startsWith("[")) return JSON.parse(body); // just in case
+  const records: any[] = [];
+  for (const line of body.split(/\r?\n/)) {
+    if (!line.startsWith("data:")) continue;
+    try {
+      records.push(JSON.parse(line.slice(5).trim()));
+    } catch {
+      /* skip malformed frame */
+    }
+  }
+  return records;
 }
 
 export async function fetchOddsSnapshot(fixtureId: number): Promise<any[]> {
