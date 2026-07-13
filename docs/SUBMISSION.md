@@ -20,7 +20,8 @@ time-locked void path guarantees refunds if a fixture is never finalised.
 
 **Link to your live & working MVP**
 
-`https://<deploy-url>` (single service: web UI + keeper API; Solana devnet + TxLINE devnet feeds)
+`https://<render-url>` — Render blueprint in repo (`render.yaml`); temporary mirror while it's pending:
+`https://celebs-stem-age-newman.trycloudflare.com`
 
 **Link to Your Live Demo Video**
 
@@ -28,11 +29,11 @@ time-locked void path guarantees refunds if a fixture is never finalised.
 
 **Project's Public Repository Link**
 
-`https://github.com/<user>/finalwhistle`
+`https://github.com/kovyrus/finalwhistle`
 
 **Link to your Project's Technical Documentation**
 
-`https://github.com/<user>/finalwhistle/blob/main/docs/TECHNICAL.md`
+`https://github.com/kovyrus/finalwhistle/blob/main/docs/TECHNICAL.md`
 
 **Share your team's experience using the TxLINE API**
 
