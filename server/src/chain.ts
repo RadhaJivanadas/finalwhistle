@@ -104,7 +104,7 @@ export async function createMarket(
   const existing = await withRetry("getAccountInfo", () => connection.getAccountInfo(market));
   if (existing) return null; // already created
 
-  const signature = await withRetry("createMarket", () =>
+  const signature = await withRetry<string>("createMarket", () =>
     (finalwhistle.methods as any)
       .createMarket(new BN(fixtureId), KIND_VARIANT[kind], line, nonce, new BN(kickoffTs))
       .accounts({
@@ -207,7 +207,7 @@ export async function settleMarket(
 }
 
 export async function fetchAllMarkets(): Promise<any[]> {
-  const accounts = await withRetry("market.all", () => (finalwhistle.account as any).market.all());
+  const accounts = await withRetry<any[]>("market.all", () => (finalwhistle.account as any).market.all());
   return accounts.map((a: any) => ({
     address: a.publicKey.toBase58(),
     fixtureId: Number(a.account.fixtureId),
