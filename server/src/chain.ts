@@ -14,8 +14,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const connection = new Connection(config.rpcUrl, "confirmed");
 
+// Keeper key: KEEPER_SECRET env (JSON array, for hosted deploys) or key file.
 export const keeper = Keypair.fromSecretKey(
-  Uint8Array.from(JSON.parse(fs.readFileSync(config.keeperKeypair, "utf8")))
+  Uint8Array.from(
+    JSON.parse(process.env.KEEPER_SECRET || fs.readFileSync(config.keeperKeypair, "utf8"))
+  )
 );
 
 const provider = new AnchorProvider(connection, new Wallet(keeper), {

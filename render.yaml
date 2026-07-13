@@ -1,0 +1,25 @@
+# Render blueprint: single web service (keeper + API + static UI).
+# Set the two secret env vars after the first deploy prompt:
+#   TXLINE_API_TOKEN — from .env.devnet (created by scripts/setup-devnet.mjs)
+#   KEEPER_SECRET    — contents of .keys/keeper.json (the JSON array)
+services:
+  - type: web
+    name: finalwhistle
+    runtime: docker
+    plan: starter # free plan sleeps on idle, which would pause the keeper
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: "8787"
+      - key: DEMO_AUTOLOOP
+        value: "1"
+      - key: RPC_URL
+        value: "https://api.devnet.solana.com"
+      - key: TXLINE_API_HOST
+        value: "https://txline-dev.txodds.com"
+      - key: DATA_DIR
+        value: "/tmp/data"
+      - key: TXLINE_API_TOKEN
+        sync: false
+      - key: KEEPER_SECRET
+        sync: false
