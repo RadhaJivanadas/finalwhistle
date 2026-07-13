@@ -20,8 +20,7 @@ time-locked void path guarantees refunds if a fixture is never finalised.
 
 **Link to your live & working MVP**
 
-`https://<render-url>` — Render blueprint in repo (`render.yaml`); temporary mirror while it's pending:
-`https://celebs-stem-age-newman.trycloudflare.com`
+https://finalwhistle-1sck.onrender.com
 
 **Link to Your Live Demo Video**
 
