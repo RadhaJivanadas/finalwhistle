@@ -162,9 +162,33 @@ async function onScoresMessage(_event: string | undefined, data: unknown) {
   store.broadcast("score", s);
 
   if (s.finalised && s.finalSeq) {
+    // The finalised record's Merkle proof anchors a few minutes AFTER the
+    // final whistle, while the feed goes quiet — so queue the settlement and
+    // keep retrying instead of relying on further stream events.
+    pendingSettlements.set(s.fixtureId, { seq: s.finalSeq, until: Date.now() + 3 * 3600_000 });
     settleFixture(s.fixtureId, s.finalSeq).catch((e) =>
       console.error(`[keeper] settlement failed fixture=${s.fixtureId}:`, e.message)
     );
+  }
+}
+
+/** Finalised fixtures awaiting a successful settlement (proof may lag). */
+const pendingSettlements = new Map<number, { seq: number; until: number }>();
+
+async function retryPendingSettlements() {
+  for (const [fixtureId, p] of pendingSettlements) {
+    try {
+      const markets = await chain.fetchAllMarkets();
+      const open = markets.filter((m) => m.fixtureId === fixtureId && m.state === "open");
+      if (!open.length || Date.now() > p.until) {
+        pendingSettlements.delete(fixtureId);
+        continue;
+      }
+      console.log(`[keeper] retrying settlement fixture=${fixtureId} (${open.length} open)`);
+      await settleFixture(fixtureId, p.seq);
+    } catch (e: any) {
+      console.warn(`[keeper] pending settlement fixture=${fixtureId}: ${e.message}`);
+    }
   }
 }
 
@@ -276,6 +300,9 @@ export function startKeeper() {
   setInterval(() => {
     syncFixtures().catch((e) => console.error("[keeper] fixtures sync failed:", e.message));
   }, 5 * 60 * 1000);
+  setInterval(() => {
+    retryPendingSettlements().catch(() => {});
+  }, 90 * 1000);
 
   txline.streamForever("/api/scores/stream", onScoresMessage, "scores");
   txline.streamForever("/api/odds/stream", onOddsMessage, "odds");

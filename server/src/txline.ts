@@ -204,6 +204,42 @@ export async function findRecentFinishedFixtures(maxDaysBack = 12): Promise<numb
   return [...seen.entries()].sort((a, b) => b[1] - a[1]).map(([id]) => id);
 }
 
+/**
+ * Stitch a fixture's score records from historical 5-minute update windows.
+ * Used when `/api/scores/historical` doesn't serve the fixture yet (it opens
+ * ~6h after kickoff) but the windows already do.
+ */
+export async function fetchScoresViaWindows(
+  fixtureId: number,
+  fromMs: number,
+  toMs: number
+): Promise<any[]> {
+  const out: any[] = [];
+  for (let t = fromMs; t <= toMs; t += 5 * 60_000) {
+    const day = Math.floor(t / 86_400_000);
+    const date = new Date(t);
+    const hour = date.getUTCHours();
+    const interval = Math.floor(date.getUTCMinutes() / 5);
+    try {
+      const res = await api.get(`/api/scores/updates/${day}/${hour}/${interval}`);
+      for (const r of res.data ?? []) {
+        if (Number(r.FixtureId ?? r.fixtureId) === fixtureId) out.push(r);
+      }
+    } catch {
+      /* empty window */
+    }
+  }
+  const seen = new Set<number>();
+  return out
+    .filter((r) => {
+      const s = Number(r.Seq ?? r.seq);
+      if (seen.has(s)) return false;
+      seen.add(s);
+      return true;
+    })
+    .sort((a, b) => Number(a.Seq ?? a.seq) - Number(b.Seq ?? b.seq));
+}
+
 /** Merkle proof for a set of stats of one score record (validateStatV2 shape). */
 export async function fetchStatValidation(
   fixtureId: number,

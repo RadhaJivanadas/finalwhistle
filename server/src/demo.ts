@@ -37,7 +37,20 @@ export async function runDemo(fixtureId: number, speed = 2, bettingSecs = 90): P
   Object.assign(demoStatus, { running: true, fixtureId, error: undefined });
 
   try {
-    const records = await txline.fetchHistoricalScores(fixtureId);
+    let records = await txline.fetchHistoricalScores(fixtureId);
+    if (!records.length) {
+      // Recently finished match: /historical opens ~6h after kickoff, but the
+      // 5-minute update windows are already served — stitch the replay there.
+      const fx = store.fixtures.get(fixtureId);
+      if (fx?.startTime) {
+        console.log(`[demo] no historical yet; stitching update windows for ${fixtureId}`);
+        records = await txline.fetchScoresViaWindows(
+          fixtureId,
+          fx.startTime - 20 * 60_000,
+          Math.min(Date.now(), fx.startTime + 4 * 3600_000)
+        );
+      }
+    }
     if (!records.length) throw new Error(`no historical records for fixture ${fixtureId}`);
     demoStatus.total = records.length;
 

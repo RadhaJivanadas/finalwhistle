@@ -22,7 +22,11 @@ export function MatchPage() {
 
   useEffect(() => {
     fetchFixtures().then((fs) => setFixture(fs.find((f) => f.fixtureId === fixtureId) ?? null)).catch(() => {});
-    const load = () => fetchMarkets().then((ms) => setMarkets(ms.filter((m) => m.fixtureId === fixtureId))).catch(() => {});
+    // Hide void markets that never had stakes — nothing to refund, pure noise.
+    const relevant = (m: MarketInfo) =>
+      m.fixtureId === fixtureId &&
+      !(m.state === "void" && m.pools.every((p) => Number(p) === 0));
+    const load = () => fetchMarkets().then((ms) => setMarkets(ms.filter(relevant))).catch(() => {});
     load();
     const t = setInterval(load, 20000);
     return () => clearInterval(t);

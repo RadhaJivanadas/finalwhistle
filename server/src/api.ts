@@ -94,6 +94,25 @@ export function createApp() {
     res.json(demoStatus);
   });
 
+  /** Manual settlement trigger (same permissionless path the keeper uses;
+   *  useful when the finalised-record proof anchors after the feed goes
+   *  quiet). Guarded by DEMO_KEY when set. */
+  app.post("/api/admin/settle", async (req, res) => {
+    if (process.env.DEMO_KEY && req.query.key !== process.env.DEMO_KEY) {
+      return res.status(403).json({ error: "bad key" });
+    }
+    const fixtureId = Number(req.query.fixtureId);
+    const seq = Number(req.query.seq);
+    if (!fixtureId || !seq) return res.status(400).json({ error: "fixtureId and seq required" });
+    const { settleFixture } = await import("./keeper.js");
+    try {
+      await settleFixture(fixtureId, seq);
+      res.json({ ok: true, receipts: store.receipts.filter((r) => r.fixtureId === fixtureId).length });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   /** Server-Sent Events relay: browsers get every live update we ingest. */
   app.get("/api/stream", (req, res) => {
     res.writeHead(200, {
