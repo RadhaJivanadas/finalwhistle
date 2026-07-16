@@ -5,11 +5,36 @@
 Built for the TxODDS World Cup hackathon (*Prediction Markets and Settlement* track).
 
 <p align="center">
+  <a href="https://finalwhistle-1sck.onrender.com"><img src="https://img.shields.io/badge/Live%20MVP-online-16a34a?style=flat-square" alt="Live MVP"></a>
+  <img src="https://img.shields.io/badge/Solana-devnet-9945FF?style=flat-square&logo=solana&logoColor=white" alt="Solana devnet">
+  <img src="https://img.shields.io/badge/Anchor-0.31-512BD4?style=flat-square" alt="Anchor 0.31">
+  <img src="https://img.shields.io/badge/settlement-CPI%20%E2%86%92%20validate__stat__v2-0ea5e9?style=flat-square" alt="CPI validate_stat_v2">
+  <img src="https://img.shields.io/badge/license-MIT-111?style=flat-square" alt="MIT">
+</p>
+
+**▶ Live MVP:** https://finalwhistle-1sck.onrender.com &nbsp;·&nbsp; **Demo video:** _add YouTube/Loom link_ &nbsp;·&nbsp; **Deep-dive:** [`docs/TECHNICAL.md`](docs/TECHNICAL.md)
+
+<p align="center">
   <em>Stakes live in an escrow no one controls. When the match is finalised, anyone can hand the escrow<br/>
   TxLINE's Merkle proof — the escrow verifies it on-chain and pays the winners. No oracle committee. No admin key.</em>
 </p>
 
 ---
+
+## Proof it works — a real World Cup match, settled on-chain
+
+Everything below is **real on-chain state on Solana devnet**, produced from TxLINE Merkle proofs — not mockups or screenshots. Click any signature to open Solana Explorer.
+
+**England 1–2 Argentina** — a real fixture (`18241006`), settled by the escrow's CPI into TxLINE `validate_stat_v2`:
+
+| Action | Market | On-chain transaction |
+|---|---|---|
+| ✅ Settle · Away win | winner `2c9tVujo…43ZSr` | [`de1azpUT…f5Abdv`](https://explorer.solana.com/tx/de1azpUTtdxuAjZxHX8QT13DxJ6Z7nYthAUcb5wAQi9sfw4U5S43D5twkFRWamkqqXRkSndJjYdtbNyNyf5Abdv?cluster=devnet) |
+| ✅ Settle · Over 2.5 | totals `DAZruDXC…jnaQh` | [`3WKM774w…DMGrGm`](https://explorer.solana.com/tx/3WKM774wNPrcHD55AscivVLrKtctqQD1iRjHFoGsfrq9mWYCQTWq3hbMvyigycZrYDFTwprSM7mYLeSXChDMGrGm?cluster=devnet) |
+| 💰 Claim 0.4015 SOL | winning pool | [`4ZUXZ61c…1oHbHUU`](https://explorer.solana.com/tx/4ZUXZ61cBimSgUFZzd3fWumWwF5rJUVdWfWNMfjap1JN5y5ZZX5YT97Can4RxRS4dhmY2jwYX9Us7xvk21oHbHUU?cluster=devnet) |
+| 💰 Claim 0.1015 SOL | winning pool | [`5Xv7uMrS…1TFgb9`](https://explorer.solana.com/tx/5Xv7uMrSs9ppnECXLftuLsMbWWPYDbw3g9EVeeYa3R2WWeyYrvc1ZVWuURqntcXALZfkdWGD996yCJPLyd1TFgb9?cluster=devnet) |
+
+The program verified TxLINE's proof against the anchored daily Merkle root **before releasing a single lamport**. A wrong outcome could not have been claimed — the proof itself refutes it — and losing stakes flowed into the winning pools. Re-verify any settlement yourself from its stored proof with [`scripts/verify-proof.mjs`](scripts/verify-proof.mjs), or from the receipt page's in-browser **"Verify"** button.
 
 ## What it does
 
@@ -110,8 +135,7 @@ curl -X POST "http://localhost:8787/api/demo/start?fixtureId=<id>&speed=4&bettin
 
 ## Docs
 
-- [`docs/TECHNICAL.md`](docs/TECHNICAL.md) — architecture deep-dive, settlement design, threat model
-- [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) — 5-minute demo video walkthrough
+- [`docs/TECHNICAL.md`](docs/TECHNICAL.md) — architecture deep-dive, settlement pipeline, threat model
 - [`docs/FEEDBACK.md`](docs/FEEDBACK.md) — our TxLINE API experience (what we loved, where we hit friction)
 
 ## License

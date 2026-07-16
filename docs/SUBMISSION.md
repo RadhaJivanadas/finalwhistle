@@ -24,15 +24,22 @@ https://finalwhistle-1sck.onrender.com
 
 **Link to Your Live Demo Video**
 
-`<loom/youtube url>` (script: docs/DEMO_SCRIPT.md)
+`<loom/youtube url>`
 
 **Project's Public Repository Link**
 
-`https://github.com/kovyrus/finalwhistle`
+`https://github.com/RadhaJivanadas/finalwhistle`
 
 **Link to your Project's Technical Documentation**
 
-`https://github.com/kovyrus/finalwhistle/blob/main/docs/TECHNICAL.md`
+`https://github.com/RadhaJivanadas/finalwhistle/blob/main/docs/TECHNICAL.md`
+
+**On-chain proof (real match, Solana devnet)**
+
+England 1–2 Argentina (fixture 18241006), settled via CPI into `validate_stat_v2`:
+- Settle winner: `de1azpUTtdxuAjZxHX8QT13DxJ6Z7nYthAUcb5wAQi9sfw4U5S43D5twkFRWamkqqXRkSndJjYdtbNyNyf5Abdv`
+- Settle totals: `3WKM774wNPrcHD55AscivVLrKtctqQD1iRjHFoGsfrq9mWYCQTWq3hbMvyigycZrYDFTwprSM7mYLeSXChDMGrGm`
+- All on `explorer.solana.com/tx/<sig>?cluster=devnet`
 
 **Share your team's experience using the TxLINE API**
 
