@@ -11,3 +11,13 @@ docs-research/
 .render-env.txt
 final-demo.mp4
 scripts/video/out*/
+
+# Solana keypairs / program authority secrets
+*-keypair.json
+program/program-keypair.json
+*.keypair.json
+
+# demo media (published to YouTube, not the repo)
+*.mp4
+*.wav
+scripts/video/vo/
