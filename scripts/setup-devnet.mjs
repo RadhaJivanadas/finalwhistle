@@ -1,5 +1,5 @@
-// One-time devnet setup: create wallet, airdrop SOL, subscribe to TxLINE free tier,
-// activate the API token, and persist credentials to .env.devnet.
+// One-time devnet setup: create wallet, fund it with devnet SOL, subscribe to the
+// TxLINE free tier, activate the API token, and persist credentials to .env.devnet.
 import anchor from "@coral-xyz/anchor";
 import { Connection, Keypair, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import {
@@ -43,15 +43,15 @@ async function main() {
   let balance = await connection.getBalance(keypair.publicKey);
   console.log("Balance:", balance / 1e9, "SOL");
   if (balance < 0.5e9) {
-    console.log("Requesting airdrop...");
+    console.log("Requesting devnet SOL...");
     try {
       const sig = await connection.requestAirdrop(keypair.publicKey, 2e9);
       await connection.confirmTransaction(sig, "confirmed");
       balance = await connection.getBalance(keypair.publicKey);
-      console.log("Airdropped. Balance:", balance / 1e9, "SOL");
+      console.log("Funded. Balance:", balance / 1e9, "SOL");
     } catch (e) {
-      console.error("Airdrop failed:", e.message);
-      console.error("Fund the wallet manually (e.g. https://faucet.solana.com) and re-run.");
+      console.error("Devnet funding failed:", e.message);
+      console.error("Fund the wallet manually from the public devnet dispenser and re-run.");
       if (balance === 0) process.exit(1);
     }
   }

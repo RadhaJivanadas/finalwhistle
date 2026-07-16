@@ -14,7 +14,7 @@ for (let attempt = 1; attempt <= 500; attempt++) {
     try {
       const sig = await c.requestAirdrop(kp.publicKey, amt * LAMPORTS_PER_SOL);
       await c.confirmTransaction(sig, "confirmed");
-      console.log(`FUNDED airdrop=${amt} SOL`);
+      console.log(`FUNDED amount=${amt} SOL`);
       process.exit(0);
     } catch (e) {
       console.error(`attempt ${attempt} amt ${amt}: ${String(e.message).slice(0, 60)}`);

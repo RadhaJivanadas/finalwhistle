@@ -63,7 +63,7 @@ If nobody can produce a valid proof (fixture cancelled, coverage dropped), a tim
 ```bash
 npm install                        # root, server and web workspaces
 
-# fund .keys/keeper.json with ~5 devnet SOL (https://faucet.solana.com), then:
+# fund .keys/keeper.json with ~5 devnet SOL (from the public devnet dispenser), then:
 bash scripts/go-live.sh            # deploy + subscribe + build + start
 
 # or step by step:

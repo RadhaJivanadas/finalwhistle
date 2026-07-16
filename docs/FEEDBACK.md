@@ -23,11 +23,11 @@
 
 ## Where we hit friction
 
-- **Devnet SOL is the real onboarding gate.** The public devnet faucet rate-limits
+- **Devnet SOL is the real onboarding gate.** The public devnet dispenser rate-limits
   aggressively, so "time to first API call" was dominated by hunting SOL for the `subscribe`
-  transaction, not by TxLINE itself. A hackathon faucet for the subscription fee (or a
-  signed-message-only free-tier activation that skips the on-chain tx) would remove the
-  slowest step.
+  transaction, not by TxLINE itself. A hackathon-provided pool of devnet SOL for the
+  subscription fee (or a signed-message-only free-tier activation that skips the on-chain
+  tx) would remove the slowest step.
 - **Proof field encodings take trial and error.** `eventStatRoot` / proof hashes arrive as
   base64 while the docs' `toBytes32` also anticipates hex and arrays; and the record `seq`
   appears as both `Seq` and `seq` depending on the endpoint. Publishing a JSON Schema (or
