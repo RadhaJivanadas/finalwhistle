@@ -41,6 +41,12 @@ England 1–2 Argentina (fixture 18241006), settled via CPI into `validate_stat_
 - Settle totals: `3WKM774wNPrcHD55AscivVLrKtctqQD1iRjHFoGsfrq9mWYCQTWq3hbMvyigycZrYDFTwprSM7mYLeSXChDMGrGm`
 - All on `explorer.solana.com/tx/<sig>?cluster=devnet`
 
+**Asset & compliance note**
+
+Stakes and payouts are in native SOL. The TxLINE credit token is used only to authorize the
+data subscription — never for staking, wagering pools, or peer-to-peer transfers. Settlement
+unlocks and routes coins other than TxLINE, in line with the track's asset rules.
+
 **Share your team's experience using the TxLINE API**
 
 See docs/FEEDBACK.md — paste its contents here (fits the "liked most / friction" prompt).

@@ -56,6 +56,8 @@ The `settle` instruction is **permissionless** — any keeper, any user, anyone 
 
 If nobody can produce a valid proof (fixture cancelled, coverage dropped), a time-locked `void_expired` path lets every bettor reclaim their stake. No funds can get stuck; no human can pick winners.
 
+> **Asset & compliance note.** Stakes and payouts are in **native SOL**. The TxLINE credit token is used *only* to authorize the data subscription — never for staking, wagering pools, or peer-to-peer transfers. Settlement unlocks and routes "coins other than TxLINE," exactly as the track's asset rules require.
+
 ## Architecture
 
 ```
