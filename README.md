@@ -12,7 +12,7 @@ Built for the TxODDS World Cup hackathon (*Prediction Markets and Settlement* tr
   <img src="https://img.shields.io/badge/license-MIT-111?style=flat-square" alt="MIT">
 </p>
 
-**▶ Live MVP:** https://finalwhistle-1sck.onrender.com &nbsp;·&nbsp; **Demo video:** _add YouTube/Loom link_ &nbsp;·&nbsp; **Deep-dive:** [`docs/TECHNICAL.md`](docs/TECHNICAL.md)
+**▶ Live MVP:** https://finalwhistle-1sck.onrender.com &nbsp;·&nbsp; **Demo video:** https://www.youtube.com/watch?v=8FjUaNCVtjA &nbsp;·&nbsp; **Deep-dive:** [`docs/TECHNICAL.md`](docs/TECHNICAL.md)
 
 <p align="center">
   <em>Stakes live in an escrow no one controls. When the match is finalised, anyone can hand the escrow<br/>

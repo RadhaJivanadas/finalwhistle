@@ -24,7 +24,7 @@ https://finalwhistle-1sck.onrender.com
 
 **Link to Your Live Demo Video**
 
-`<loom/youtube url>`
+https://www.youtube.com/watch?v=8FjUaNCVtjA
 
 **Project's Public Repository Link**
 
