@@ -1,4 +1,4 @@
-# Final Whistle — technical documentation
+# Final Whistle: technical documentation
 
 ## Core idea
 
@@ -6,7 +6,7 @@ A prediction market is only as honest as its settlement. Final Whistle removes t
 trust assumption entirely: market outcomes are decided by **TxLINE's cryptographically anchored
 match data**, verified **inside the Solana runtime** at the moment funds are released.
 
-The escrow program never trusts our backend. The backend (keeper) is just a convenience — the
+The escrow program never trusts our backend. The backend (keeper) is just a convenience, the
 first caller of a permissionless `settle` instruction that anyone could call with the same
 public proof.
 
@@ -14,7 +14,7 @@ public proof.
 
 1. **Finalisation.** TxLINE's scores stream emits the finalised record for a fixture
    (`action=game_finalised`, `statusId=100`, `period=100`). It covers regulation wins,
-   extra time, penalties and abandonment — one uniform terminal record.
+   extra time, penalties and abandonment. One uniform terminal record.
 2. **Proof fetch.** The keeper requests
    `GET /api/scores/stat-validation?fixtureId=…&seq=<finalSeq>&statKeys=1,2`
    (keys 7,8 for corners markets). The response contains the stat leaves, per-stat Merkle
@@ -24,7 +24,7 @@ public proof.
    - checks `payload.fixture_summary.fixture_id == market.fixture_id`;
    - checks the payload contains exactly the market's settlement stat keys with `period == 100`;
    - derives the canonical TxLINE PDA `["daily_scores_roots", epoch_day_le_u16]` from
-     `payload.ts` and requires the passed roots account to match — an attacker cannot
+     `payload.ts` and requires the passed roots account to match, so an attacker cannot
      substitute their own roots account;
    - **constructs the predicate itself** from `(market.kind, market.line, winning_outcome)`:
 
@@ -41,7 +41,7 @@ public proof.
      `stat leaf → event-stat root → fixture sub-tree → main tree → anchored daily root`
      and evaluates the predicate on the proven values.
 4. **Payouts.** The market flips to `Settled`; `claim` pays each winning position
-   `stake × total_pool / winning_pool` (u128 floor math — the vault can never be overdrawn)
+   `stake × total_pool / winning_pool` (u128 floor math, so the vault can never be overdrawn)
    straight from the vault PDA via a system transfer signed with program seeds.
 
 ### Threat model
@@ -60,7 +60,7 @@ public proof.
 
 ### Why parimutuel
 
-Parimutuel pools need no counterparty, no order book and no liquidity provider — ideal for a
+Parimutuel pools need no counterparty, no order book and no liquidity provider. That fits a
 market that must *always* be resolvable purely from a final score. Implied odds are just
 `total / pool_i`, shown live in the UI as pool shares shift.
 
@@ -68,14 +68,14 @@ market that must *always* be resolvable purely from a final score. Implied odds 
 
 Accounts:
 
-- `Market` — fixture id, kind (`Winner | TotalGoals | TotalCorners`), half-line, nonce,
+- `Market`: fixture id, kind (`Winner | TotalGoals | TotalCorners`), half-line, nonce,
   kickoff ts, state, pools `[u64;3]`, bumps. PDA: `["market", fixture_id, kind, line, nonce]`.
-- `Position` — per (market, bettor, outcome), amount. Closed on claim (rent back to bettor).
-- Vault — a data-less `SystemAccount` PDA `["vault", market]`; funds move only by
+- `Position`: per (market, bettor, outcome), amount. Closed on claim (rent back to bettor).
+- Vault: a data-less `SystemAccount` PDA `["vault", market]`; funds move only by
   system-program transfers (in: user signature; out: program-signed with seeds).
 
 The TxLINE program is integrated with Anchor's `declare_program!(txoracle)` against the
-published devnet IDL — no hand-rolled discriminators, and the CPI types
+published devnet IDL: no hand-rolled discriminators, and the CPI types
 (`StatValidationInput`, `NDimensionalStrategy`, …) come straight from the IDL.
 
 Instructions: `create_market`, `place_bet`, `settle`, `claim`, `void_expired`.
@@ -94,7 +94,7 @@ All money paths are covered by overflow checks (`overflow-checks = true` in rele
 - **Odds SSE:** latest consensus prices + in-memory history for the price-movement chart.
 - **Demo replay:** `/api/demo/start?fixtureId=…` re-broadcasts `/api/scores/historical/{id}`
   records at configurable speed and finishes with a **real** on-chain settlement using the
-  **real** proof — pacing is the only simulated thing. Built because judging happens after
+  **real** proof. Pacing is the only simulated thing. Built because judging happens after
   the tournament ends (as the brief anticipates).
 
 ## Web (`web/`)
@@ -106,13 +106,13 @@ React + Vite + Tailwind. Wallet adapter (Phantom/Solflare) on devnet.
 - Consensus odds panel: implied probabilities (vig removed) + price-movement chart
   (hand-rolled SVG, colorblind-validated palette).
 - **Receipt page** (`/receipt/:market`): the full settlement evidence chain and a
-  **browser-side re-verification** — the page rebuilds the exact `validate_stat_v2` call
+  **browser-side re-verification**: the page rebuilds the exact `validate_stat_v2` call
   from the stored proof and runs it as a read-only simulation against devnet RPC using a
   throwaway keypair. The verdict comes from the TxLINE program itself, not from our backend.
 
 ## Determinism notes
 
-- The strategy/predicate builder is a pure function of `(kind, line, outcome)` — identical
+- The strategy/predicate builder is a pure function of `(kind, line, outcome)`, identical
   in Rust (`build_strategy`) and mirrored in TS only for display (`describeStrategy`).
 - Epoch day is always derived from the proof's own `minTimestamp` (never wall clock).
 - Half-lines eliminate pushes: `line = N` ⇔ over/under N.5, so exactly one side wins.
@@ -123,4 +123,4 @@ React + Vite + Tailwind. Wallet adapter (Phantom/Solflare) on devnet.
 - Corners markets are implemented in the program; the keeper currently opens 1X2 + totals
   by default to keep pools concentrated.
 - Odds history is in-memory (bounded); a real deployment would persist it.
-- One keeper today, but any number can run in parallel — settlement is first-proof-wins.
+- One keeper today, but any number can run in parallel; settlement is first-proof-wins.

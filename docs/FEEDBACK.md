@@ -13,7 +13,7 @@
   a first-party SDK rather than scraping an API.
 - **`game_finalised` semantics are exactly what a settlement engine needs.** One terminal
   record (`statusId=100`, `period=100`) covering FT/AET/pens/abandonment gave us a single
-  deterministic trigger — no special-casing tournament edge cases.
+  deterministic trigger, no special-casing tournament edge cases.
 - **SSE streams are clean and fast.** Standard SSE + heartbeats, easy to parse with ~40 lines
   of code, reconnect-friendly. `/api/scores/historical` made our replay demo (and disaster
   recovery) trivial.
@@ -36,7 +36,7 @@
 - **Stat `period` vs record `statusId` semantics needed digging.** That the finalised
   record's stats carry `period=100` (and that this is the correct finality gate for
   settlement) is documented, but spread across three pages. A dedicated "how to settle a
-  market correctly" recipe — record choice, phase table, pitfalls — would be a killer doc
+  market correctly" recipe (record choice, phase table, pitfalls) would be a killer doc
   page for this exact use case.
 - **`validateStatV2` compute needs are opaque.** We budget 1.4M CU because the examples do;
   actual usage varies with proof depth. Publishing typical/worst-case CU per proof shape
@@ -44,7 +44,7 @@
   instructions).
 - **`/api/scores/historical` returns SSE-formatted text over a plain GET.** The response is
   `data: {...}` blocks rather than a JSON array, unlike the sibling snapshot/updates
-  endpoints — we only caught it in integration. Either documenting this or offering an
+  endpoints; we only caught it in integration. Either documenting this or offering an
   `Accept: application/json` variant would smooth it out.
 - **Minor:** `/api/scores/stat-validation` with `seq=0` fails with a generic error rather
   than "sequence must be ≥ 1"; and odds `Prices` scaling (×1000 integers) is easy to miss
